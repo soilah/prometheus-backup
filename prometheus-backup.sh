@@ -199,7 +199,7 @@ if [ "$BACKUP_DATA" = true ]; then
 
 	if [[ $USER = 'root' ]]; then
 		info "Starting prometheus service..."
-		systemctl stop prometheus &> /dev/null
+		systemctl start prometheus &> /dev/null
 
 		STATUS=$(systemctl is-active prometheus)
 		if [ "$STATUS" == "inactive" ]; then
