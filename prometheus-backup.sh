@@ -195,6 +195,17 @@ if [ "$BACKUP_DATA" = true ]; then
 	info "Backing up prometheus data..."
 	rsync -r $PROMETHEUS_DATA_DIR/* $BACKUP_DIR/data
 	ok "Done"
+
+
+	if [[ $USER = 'root' ]]; then
+		info "Starting prometheus service..."
+		systemctl stop prometheus &> /dev/null
+
+		STATUS=$(systemctl is-active prometheus)
+		if [ "$STATUS" == "inactive" ]; then
+			error "Could not restart prometheus service. Start it manually."
+		fi
+	fi
 fi
 
 ok "Backup successful!"
