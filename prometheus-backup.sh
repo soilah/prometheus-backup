@@ -3,14 +3,15 @@ source ./utils.sh
 
 
 DATE_SUFFIX=$(date +%F_%H%M%S)
-PROMETHEUS_CONFIG_DIR=$(dirname $(systemctl --full --no-pager status prometheus | grep "config.file" | awk -F'--config.file' '{print $2}' | tr -d " " | cut -d'-' -f1 ))
-PROMETHEUS_DATA_DIR=$(systemctl --full --no-pager status prometheus | grep "storage.tsdb.path" | awk -F'--storage.tsdb.path' '{print $2}' | tr -d " " | cut -d'-' -f1 )
+PROMETHEUS_CONFIG_DIR=$(dirname $(systemctl --full --no-pager status prometheus | grep "config.file" | awk -F'--config.file' '{print $2}' | sed 's/^[= ]//g' | cut -d" " -f1))
+PROMETHEUS_DATA_DIR=$(systemctl --full --no-pager status prometheus | grep "storage.tsdb.path" | awk -F'--storage.tsdb.path' '{print $2}' | sed 's/^[= ]//g' | cut -d" " -f1)
 BACKUP_DIR="/var/backups/prometheus-BACKUP/prometheus$DATE_SUFFIX"
 BACKUP_DIR_PARENT="~/prometheus-BACKUP"
 BACKUP_DATA=true
 BACKUP_DIR_INITIALIZED=false
 BACKUP_INCREMENTAL=false
 FORCE_BACKUP=false
+BACKUP_VICTORIAMETRICS=false
 
 print_help() {
 	echo ./$(basename $0) [OPTIONS]
@@ -40,7 +41,7 @@ check_backup_dir_create () {
 
 check_args() {
 	# read the options
-	options=$(getopt -o hIBF:SC:D: --long help,incremental,force,backup-dir:,no-data,config-dir:,data-dir: -- "$@")
+	options=$(getopt -o hIBF:SC:D: --long help,incremental,force,backup-dir:,no-data,config-dir:,data-dir:,victoriametrics -- "$@")
 	eval set -- "$options"
 
 	# extract options and their arguments into variables.
@@ -109,6 +110,10 @@ check_args() {
 			BACKUP_DATA=false
 			shift 1
 			;;
+		--victoriametrics)
+			BACKUP_VICTORIAMETRICS=true
+			shift 1
+			;;
 		--) shift; break
 			;;
 		*) echo "Internal error!" ; exit 1 ;;
@@ -116,6 +121,7 @@ check_args() {
 	done
 }
 
+	
 
 
 check_args "$@"
