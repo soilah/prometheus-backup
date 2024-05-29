@@ -21,6 +21,7 @@ print_help() {
 	echo -e "\t-D|--data-dir data directory\tSpecify prometheus data directory if not default. Default is taken from systemd configuration"
 	echo -e "\t-I|--incremental \t Perform an incremental backup. Backup files (config and data) that are newer than the latest versions inside the backup directory"
 	echo -e "\t-S|--no-data \t\t\t\tSave configuration only without data folder"
+	echo -e "\t-F|--force \t\t\t\tDo not interactively show prompt to user."
 }
 
 check_backup_dir_create () {
@@ -61,8 +62,9 @@ check_args() {
 		-B|--backup-dir)
 			BACKUP_DIR_PARENT=$2
 			if [[ ! -d $BACKUP_DIR_PARENT ]]; then
-				error "Directory $BACKUP_DIR_PARENT does not exist. Exiting."
-				exit
+				info "Directory $BACKUP_DIR_PARENT does not exist. Creating it..."
+				#error "Directory $BACKUP_DIR_PARENT does not exist. Exiting."
+				mkdir $BACKUP_DIR_PARENT
 			fi
 			test -w $BACKUP_DIR_PARENT
 			if [ $? -eq 0 ]; then
@@ -121,6 +123,10 @@ check_args() {
 	done
 }
 
+
+check_victoriametrics() {
+	VICTORIAMETRICS_STORAGE_PATH=$(systemctl --full --no-pager status victoriametrics | grep "storageDataPath" | awk -F'-storageDataPath' '{print $2}' | sed 's/^[= ]//g' | cut -d" " -f1)
+}
 	
 
 
