@@ -49,7 +49,7 @@ db_backup() {
 		PASSWORD=$(cat /etc/grafana/grafana.ini  | grep "\[database\]" -A 70 | grep -e "password.*=" | cut -d'=' -f2 | tr -d " ")
 		DB_NAME=$(cat /etc/grafana/grafana.ini  | grep "\[database\]" -A 70 | grep -e "name.*=" | cut -d'=' -f2 | tr -d " ")
 		#DB_HOST=$(cat /etc/grafana/grafana.ini  | grep "\[database\]" -A 70 | grep -e "host.*=" | cut -d'=' -f2 | tr -d " ")
-		mysqldump -u$USER -p'$PASSWORD' $DB_NAME > grafana_backup.sql
+		mysqldump --no-tablespaces -u$USER -p'$PASSWORD' $DB_NAME > grafana_backup.sql
 		ok "OK"
 		info "Backing up database file..."
 		rsync -a grafana_backup.sql $BACKUP_DIR/data
